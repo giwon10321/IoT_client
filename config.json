@@ -1,0 +1,22 @@
+{
+  "ddpConfig": {
+    "host": "localhost",
+    "port": "3000",
+    "ssl": false,
+    "autoReconnect": true,
+    "autoReconnectTimer": 500,
+    "maintainCollections": true,
+    "ddpVersion": "1",
+    "useSockJs": true
+  },
+  "controlSettings":{
+    "targetTemp": 22
+  },
+  "user": {
+    "username": "giwon",
+    "password": "1q2w3e4r"
+  },
+  "device": {
+    "deviceToken": "iPYfdrAgDeBRFd7Jr"
+  }
+}
