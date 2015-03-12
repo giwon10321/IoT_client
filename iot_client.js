@@ -1,6 +1,7 @@
 var DDPClient = require("ddp"),
     config = require("./config"),
-    tempSensor = require("./temperature_sensor");
+    tempSensor = require("./temperature_sensor"),
+    humiSensor = require("./humidity_sensor");
 
 var ddpConfig = config["ddpConfig"];
 var userConfig = config["user"];
@@ -18,6 +19,7 @@ var ddpclient = new DDPClient({
 });
 
 var tempsensor = new tempSensor(30, -1);
+var humisensor = new humiSensor();
 
 ddpclient.connect(function(err, wasReconnect){
     if(err){
@@ -38,13 +40,14 @@ ddpclient.connect(function(err, wasReconnect){
         if(result) {
             console.log(result);
             tempsensor.start();
+            humisensor.start();
         }
     });
 });
 
-ddpclient.on("message", function(msg){
-    console.log("ddp message: " + msg);
-});
+//ddpclient.on("message", function(msg){
+//    console.log("ddp message: " + msg);
+//});
 
 tempsensor.on("measure", function(values){
     values.deviceToken = deviceConfig["deviceToken"];
@@ -53,7 +56,21 @@ tempsensor.on("measure", function(values){
             console.error(err);
         }
         if(result){
-            console.log("result : "+result);
+            console.log("temp result : "+result);
+        }
+    }, function(){
+        //console.log(ddpclient.collections.temperatures);
+    });
+});
+
+humisensor.on("measure", function(values){
+    values.deviceToken = deviceConfig["deviceToken"];
+    ddpclient.call('insertHumi', [values], function(err, result){
+        if(err){
+            console.error(err);
+        }
+        if(result){
+            console.log("humi result : "+result);
         }
     }, function(){
         //console.log(ddpclient.collections.temperatures);
