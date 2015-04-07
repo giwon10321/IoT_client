@@ -1,5 +1,6 @@
 var DDPClient = require("ddp"),
     config = require("./config"),
+	sensors = require("./sensors"),
     tempSensor = require("./temperature_sensor"),
     humiSensor = require("./humidity_sensor");
 
@@ -20,6 +21,7 @@ var ddpclient = new DDPClient({
 
 var tempsensor = new tempSensor(30, -1);
 var humisensor = new humiSensor();
+var sensors = new sensors();
 
 ddpclient.connect(function(err, wasReconnect){
     if(err){
@@ -30,7 +32,7 @@ ddpclient.connect(function(err, wasReconnect){
         console.log("reestablishment of a connection");
     }
 
-    console.log("connected");
+    console.log("connected to server");
     ddpclient.call('login',[
         {user: {username: userConfig["username"]}, password: userConfig["password"]}
     ] ,function(err,result){
@@ -39,41 +41,23 @@ ddpclient.connect(function(err, wasReconnect){
         }
         if(result) {
             console.log(result);
-            tempsensor.start();
-            humisensor.start();
+			sensors.start();
         }
     });
 });
-
-//ddpclient.on("message", function(msg){
-//    console.log("ddp message: " + msg);
-//});
-
-tempsensor.on("measure", function(values){
-    values.deviceToken = deviceConfig["deviceToken"];
-    ddpclient.call('insertTemp', [values], function(err, result){
-        if(err){
-            console.error(err);
-        }
-        if(result){
-            console.log("temp result : "+result);
-        }
-    }, function(){
-        //console.log(ddpclient.collections.temperatures);
-    });
+sensors.on("ready", function(value){
+	sensors.measure();
 });
+sensors.on("measure", function(values){
+	values.deviceToken = deviceConfig["deviceToken"];
+	ddpclient.call('insertTemp', [values], function(err, result){
+		if(err){
+			console.error(err);
+		}
+		if(result){
+			console.log("temp result: "+result);
+		}
+	}, function(){
 
-humisensor.on("measure", function(values){
-    values.deviceToken = deviceConfig["deviceToken"];
-    ddpclient.call('insertHumi', [values], function(err, result){
-        if(err){
-            console.error(err);
-        }
-        if(result){
-            console.log("humi result : "+result);
-        }
-    }, function(){
-        //console.log(ddpclient.collections.temperatures);
-    });
+	});
 });
-
